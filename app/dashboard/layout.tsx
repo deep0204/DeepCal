@@ -2,11 +2,12 @@ import { Sidebar } from '@/components/dashboard/sidebar'
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
-    // STRICT WIDTH BOUNDARIES ADDED HERE
-    <div className="flex min-h-screen w-full overflow-x-hidden bg-muted/30">
+    // 1. Changed min-h-screen to h-screen to lock it to the viewport
+    // 2. Removed overflow-x-hidden which was breaking the sticky sidebar!
+    <div className="flex h-screen w-full bg-muted/30 overflow-hidden">
       <Sidebar />
-      {/* min-w-0 is the magic key that forces child cards to shrink on mobile */}
-      <main className="flex-1 min-w-0 w-full">
+      {/* 3. Added overflow-y-auto HERE so ONLY the right side scrolls */}
+      <main className="flex-1 min-w-0 w-full h-full overflow-y-auto">
         <div className="p-4 lg:p-8 w-full max-w-full">{children}</div>
       </main>
     </div>

@@ -1,6 +1,7 @@
 import './globals.css'
 import { Inter } from 'next/font/google'
-import { Toaster } from "@/components/ui/sonner" // 1. Import Toaster
+import { Toaster } from "@/components/ui/sonner"
+import { ThemeProvider } from "@/components/theme-provider" // 1. Import it
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -15,11 +16,18 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        {children}
-        {/* 2. Add Toaster right before the closing body tag */}
-        <Toaster position="bottom-right" theme="dark" richColors />
+        {/* 3. Wrap everything inside the body with the ThemeProvider */}
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+          <Toaster position="bottom-right" theme="system" richColors />
+        </ThemeProvider>
       </body>
     </html>
   )

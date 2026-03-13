@@ -15,8 +15,9 @@ import {
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
-import { createEventTypeAction , updateEventTypeAction} from '@/lib/actions'
+import { createEventTypeAction, updateEventTypeAction } from '@/lib/actions'
 import { EventType } from '@/lib/types' 
+import { toast } from 'sonner' // Added the modern toast!
 
 const DURATIONS = [15, 30, 45, 60, 90, 120]
 const EVENT_COLORS = ['#ffffff', '#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6']
@@ -30,8 +31,9 @@ export function EventTypeForm({ initialData }: { initialData?: EventType }) {
   const [duration, setDuration] = useState(initialData?.duration || 30)
   const [slug, setSlug] = useState(initialData?.slug || '')
   const [color, setColor] = useState(initialData?.color || EVENT_COLORS[0])
-  const [bufferBefore, setBufferBefore] = useState(0)
-  const [bufferAfter, setBufferAfter] = useState(0)
+  
+  // Using a single buffer time that applies to the force field (Before & After)
+  const [bufferTime, setBufferTime] = useState(initialData?.bufferTime || 0)
 
   const generateSlug = (text: string) => {
     return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
@@ -40,28 +42,34 @@ export function EventTypeForm({ initialData }: { initialData?: EventType }) {
   const handleTitleChange = (value: string) => {
     setTitle(value)
     // Auto-generate slug from title if it's a new event
-    setSlug(generateSlug(value))
+    if (!initialData) {
+      setSlug(generateSlug(value))
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
 
+    // Pack all the data, INCLUDING bufferTime!
+    const payload = { title, description, duration, slug, color, bufferTime }
+
     let result;
 
     // If we have initialData, we are EDITING. Otherwise, CREATING.
     if (initialData) {
-      result = await updateEventTypeAction(initialData.id, { title, description, duration, slug, color })
+      result = await updateEventTypeAction(initialData.id, payload)
     } else {
-      result = await createEventTypeAction({ title, description, duration, slug, color })
+      result = await createEventTypeAction(payload)
     }
 
     if (result.error) {
-      alert(`Error: ${result.error}`)
+      toast.error(result.error) // Upgraded to toast
       setLoading(false)
       return
     }
 
+    toast.success(initialData ? "Event type updated!" : "Event type created!")
     router.push('/dashboard/event-types')
   }
 
@@ -99,7 +107,7 @@ export function EventTypeForm({ initialData }: { initialData?: EventType }) {
           <div className="space-y-2">
             <Label htmlFor="slug">URL Slug</Label>
             <div className="flex items-center">
-              <span className="text-muted-foreground text-sm mr-2 font-mono">cal.clone/</span>
+              <span className="text-muted-foreground text-sm mr-2 font-mono">deepcal/</span>
               <Input
                 id="slug"
                 value={slug}
@@ -150,31 +158,21 @@ export function EventTypeForm({ initialData }: { initialData?: EventType }) {
           <CardTitle>Buffer Time (Bonus Feature)</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="bufferBefore">Before event</Label>
-              <Select value={bufferBefore.toString()} onValueChange={(v) => setBufferBefore(parseInt(v))}>
-                <SelectTrigger className="bg-background"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="0">No buffer</SelectItem>
-                  <SelectItem value="5">5 minutes</SelectItem>
-                  <SelectItem value="15">15 minutes</SelectItem>
-                  <SelectItem value="30">30 minutes</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="bufferAfter">After event</Label>
-              <Select value={bufferAfter.toString()} onValueChange={(v) => setBufferAfter(parseInt(v))}>
-                <SelectTrigger className="bg-background"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="0">No buffer</SelectItem>
-                  <SelectItem value="5">5 minutes</SelectItem>
-                  <SelectItem value="15">15 minutes</SelectItem>
-                  <SelectItem value="30">30 minutes</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="bufferTime">Rest time before & after meeting</Label>
+            <Select value={bufferTime.toString()} onValueChange={(v) => setBufferTime(parseInt(v))}>
+              <SelectTrigger className="bg-background"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="0">No buffer</SelectItem>
+                <SelectItem value="5">5 minutes</SelectItem>
+                <SelectItem value="10">10 minutes</SelectItem>
+                <SelectItem value="15">15 minutes</SelectItem>
+                <SelectItem value="30">30 minutes</SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-[0.8rem] text-muted-foreground mt-2">
+              Creates a protective gap around your meetings so nobody can book back-to-back.
+            </p>
           </div>
         </CardContent>
       </Card>
@@ -184,8 +182,8 @@ export function EventTypeForm({ initialData }: { initialData?: EventType }) {
           Cancel
         </Button>
         <Button type="submit" disabled={loading} className="flex-1">
-  {loading ? 'Saving...' : initialData ? 'Update Event Type' : 'Create Event Type'}
-</Button>
+          {loading ? 'Saving...' : initialData ? 'Update Event Type' : 'Create Event Type'}
+        </Button>
       </div>
     </form>
   )

@@ -760,6 +760,7 @@ export const EventTypeScalarFieldEnum = {
   slug: 'slug',
   color: 'color',
   isActive: 'isActive',
+  bufferTime: 'bufferTime',
   userId: 'userId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'

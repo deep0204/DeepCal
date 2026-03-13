@@ -2,6 +2,10 @@
 
 import prisma from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
+import { Resend } from 'resend'
+
+// Initialize Resend at the top so all functions can access it!
+const resend = new Resend(process.env.RESEND_API_KEY)
 
 export async function createEventTypeAction(data: {
   title: string
@@ -9,6 +13,7 @@ export async function createEventTypeAction(data: {
   duration: number
   slug: string
   color: string
+  bufferTime: number // <-- ADDED
 }) {
   try {
     const user = await prisma.user.findUnique({
@@ -24,6 +29,7 @@ export async function createEventTypeAction(data: {
         duration: Number(data.duration),
         slug: data.slug,
         color: data.color,
+        bufferTime: Number(data.bufferTime || 0), // <-- ADDED
         userId: user.id,
       }
     })
@@ -36,6 +42,7 @@ export async function createEventTypeAction(data: {
     return { error: 'Failed to create event type' }
   }
 }
+
 export async function updateAvailabilityAction(schedules: { 
     dayOfWeek: number, 
     startTime: string, 
@@ -81,19 +88,25 @@ export async function updateAvailabilityAction(schedules: {
       console.error("Failed to update availability:", error)
       return { error: 'Failed to save availability' }
     }
-  }
-  export async function createBookingAction(data: {
+}
+
+export async function createBookingAction(data: {
     eventTypeId: string
     startTime: Date
     endTime: Date
     guestName: string
     guestEmail: string
     guestNotes?: string
-  }) {
-    console.log("🚀 INCOMING BOOKING DATA:", data) // <-- This will tell us if name/email is missing
-  
+}) {
     try {
-      await prisma.booking.create({
+      const eventType = await prisma.eventType.findUnique({
+        where: { id: data.eventTypeId }
+      })
+  
+      if (!eventType) return { error: 'Event type not found' }
+  
+      // 1. Save the booking to the database
+      const booking = await prisma.booking.create({
         data: {
           eventTypeId: data.eventTypeId,
           startTime: data.startTime,
@@ -101,41 +114,73 @@ export async function updateAvailabilityAction(schedules: {
           guestName: data.guestName,
           guestEmail: data.guestEmail,
           guestNotes: data.guestNotes,
+          status: 'upcoming'
         }
       })
   
+      // 2. Format the date and time for the email
+      const meetingDate = data.startTime.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
+      const meetingTime = `${data.startTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })} - ${data.endTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}`
+  
+      // 3. FIRE THE EMAIL!
+      try {
+        await resend.emails.send({
+          from: 'DeepCal <onboarding@resend.dev>', // Must use this on the free tier
+          to: data.guestEmail, // Remember: This must be your registered Resend email during testing!
+          subject: `Confirmed: ${eventType.title} with Deep Bansal`,
+          html: `
+            <div style="font-family: sans-serif; max-w: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e5e7eb; border-radius: 8px;">
+              <h2 style="color: #111827;">Booking Confirmed! 🎉</h2>
+              <p style="color: #374151; font-size: 16px;">Hi ${data.guestName},</p>
+              <p style="color: #374151; font-size: 16px;">Your meeting has been successfully scheduled. Here are the details:</p>
+              
+              <div style="background-color: #f3f4f6; padding: 16px; border-radius: 6px; margin: 20px 0;">
+                <p style="margin: 0 0 8px 0; color: #111827;"><strong>Event:</strong> ${eventType.title}</p>
+                <p style="margin: 0 0 8px 0; color: #111827;"><strong>Date:</strong> ${meetingDate}</p>
+                <p style="margin: 0 0 0 0; color: #111827;"><strong>Time:</strong> ${meetingTime} (Asia/Kolkata)</p>
+              </div>
+              
+              ${data.guestNotes ? `<p style="color: #4b5563; font-size: 14px;"><strong>Your Notes:</strong> ${data.guestNotes}</p>` : ''}
+              
+              <p style="color: #374151; font-size: 16px;">A calendar invitation with the Google Meet link will be provided separately.</p>
+              <br/>
+              <p style="color: #111827; font-weight: bold; margin: 0;">Thanks,</p>
+              <p style="color: #111827; margin: 0;">DeepCal</p>
+            </div>
+          `
+        })
+        console.log("Email sent successfully!")
+      } catch (emailError) {
+        console.error("Failed to send Resend email:", emailError)
+      }
+  
       revalidatePath('/dashboard/bookings')
       return { success: true }
+  
     } catch (error) {
-      console.log("❌❌❌ PRISMA CRASHED ❌❌❌")
-      console.log(error)
-      return { error: 'Failed to schedule meeting' }
+      console.error("Booking error:", error)
+      return { error: 'Failed to create booking' }
     }
-  }
+}
 
-  export async function getAvailableTimeSlots(eventTypeId: string, dateStr: string) {
+export async function getAvailableTimeSlots(eventTypeId: string, dateStr: string) {
     try {
-      // 1. Setup the target date and day of week (0 = Sunday, 1 = Monday...)
       const targetDate = new Date(dateStr)
       const dayOfWeek = targetDate.getDay()
   
-      // 2. Fetch the Event Type to know the duration
       const eventType = await prisma.eventType.findUnique({ 
         where: { id: eventTypeId } 
       })
       if (!eventType) throw new Error("Event type not found")
   
-      // 3. Fetch the user's Availability for this specific day
       const schedule = await prisma.availability.findUnique({
         where: {
           userId_dayOfWeek: { userId: eventType.userId, dayOfWeek }
         }
       })
   
-      // If they don't work this day, or the day is turned off, return no slots!
       if (!schedule || !schedule.isActive) return []
   
-      // 4. Fetch all existing bookings for this exact day to prevent overlaps
       const startOfDay = new Date(targetDate)
       startOfDay.setHours(0, 0, 0, 0)
       
@@ -147,14 +192,12 @@ export async function updateAvailabilityAction(schedules: {
           eventType: { userId: eventType.userId },
           startTime: { gte: startOfDay },
           endTime: { lte: endOfDay },
-          status: { not: 'cancelled' } // Cancelled meetings don't block time!
+          status: { not: 'cancelled' } 
         }
       })
   
-      // 5. THE GENERATOR LOOP
       const availableSlots: string[] = []
       
-      // Convert "09:00" string from database into usable Date objects
       const [startHour, startMin] = schedule.startTime.split(':').map(Number)
       const [endHour, endMin] = schedule.endTime.split(':').map(Number)
   
@@ -165,36 +208,50 @@ export async function updateAvailabilityAction(schedules: {
       endOfWorkDay.setHours(endHour, endMin, 0, 0)
   
       const now = new Date()
-  
-      // Keep generating slots until we hit the end of the work day
+      
+      // Calculate the buffer in milliseconds
+      const bufferMs = (eventType.bufferTime || 0) * 60000
+
       while (currentTime < endOfWorkDay) {
-        // Calculate when this specific meeting would end
         const slotEndTime = new Date(currentTime.getTime() + eventType.duration * 60000)
   
-        // Rule: The meeting cannot bleed past the end of the work day
         if (slotEndTime > endOfWorkDay) break
   
-        // Rule: Check for overlaps with existing bookings
+        let jumpToTime: Date | null = null
+  
+        // 🛡️ THE FORCE FIELD WITH SMART JUMP TRACKING
         const isOverlapping = existingBookings.some((booking) => {
-          return (
-            (currentTime >= booking.startTime && currentTime < booking.endTime) ||
-            (slotEndTime > booking.startTime && slotEndTime <= booking.endTime) ||
-            (currentTime <= booking.startTime && slotEndTime >= booking.endTime)
-          )
+          const blockedStart = new Date(booking.startTime.getTime() - bufferMs)
+          const blockedEnd = new Date(booking.endTime.getTime() + bufferMs)
+
+          if (
+            (currentTime >= blockedStart && currentTime < blockedEnd) ||
+            (slotEndTime > blockedStart && slotEndTime <= blockedEnd) ||
+            (currentTime <= blockedStart && slotEndTime >= blockedEnd)
+          ) {
+            // We hit a block! Tell the algorithm exactly when this block ends
+            jumpToTime = blockedEnd
+            return true
+          }
+          return false
         })
   
-        // Rule: You cannot book a meeting in the past
         const isPast = currentTime < now
   
-        // If it passes all checks, format it as "HH:MM" and add it to our array!
         if (!isOverlapping && !isPast) {
+          // Slot is fully available!
           availableSlots.push(
             currentTime.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' })
           )
+          // Normal step by duration
+          currentTime.setTime(currentTime.getTime() + eventType.duration * 60000)
+        } else if (jumpToTime) {
+          // SMART JUMP: Fast-forward the grid to start exactly when the buffer clears!
+          currentTime.setTime((jumpToTime as Date).getTime())
+        } else {
+          // If it was just in the past, step normally
+          currentTime.setTime(currentTime.getTime() + eventType.duration * 60000)
         }
-  
-        // Step forward by the event duration (e.g., advance 30 mins)
-        currentTime.setTime(currentTime.getTime() + eventType.duration * 60000)
       }
   
       return availableSlots
@@ -203,8 +260,9 @@ export async function updateAvailabilityAction(schedules: {
       console.error("Failed to generate time slots:", error)
       return []
     }
-  }
-  export async function cancelBookingAction(bookingId: string, reason: string) {
+}
+
+export async function cancelBookingAction(bookingId: string, reason: string) {
     try {
       await prisma.booking.update({
         where: { id: bookingId },
@@ -214,16 +272,15 @@ export async function updateAvailabilityAction(schedules: {
         }
       })
   
-      // Instantly refresh the bookings dashboard
       revalidatePath('/dashboard/bookings')
       return { success: true }
     } catch (error) {
       console.error("Failed to cancel booking:", error)
       return { error: 'Failed to cancel booking' }
     }
-  }
+}
 
-  // --- EVENT TYPE ACTIONS ---
+// --- EVENT TYPE ACTIONS ---
 
 export async function deleteEventTypeAction(id: string) {
     try {
@@ -233,9 +290,9 @@ export async function deleteEventTypeAction(id: string) {
     } catch (error) {
       return { error: 'Failed to delete event type' }
     }
-  }
+}
   
-  export async function toggleEventTypeActiveAction(id: string, isActive: boolean) {
+export async function toggleEventTypeActiveAction(id: string, isActive: boolean) {
     try {
       await prisma.eventType.update({
         where: { id },
@@ -246,15 +303,16 @@ export async function deleteEventTypeAction(id: string) {
     } catch (error) {
       return { error: 'Failed to toggle status' }
     }
-  }
+}
   
-  export async function updateEventTypeAction(id: string, data: {
+export async function updateEventTypeAction(id: string, data: {
     title: string
     description: string | null
     duration: number
     slug: string
     color: string
-  }) {
+    bufferTime: number // <-- ADDED
+}) {
     try {
       await prisma.eventType.update({
         where: { id },
@@ -264,6 +322,7 @@ export async function deleteEventTypeAction(id: string) {
           duration: Number(data.duration),
           slug: data.slug,
           color: data.color,
+          bufferTime: Number(data.bufferTime || 0), // <-- ADDED
         }
       })
       revalidatePath('/dashboard/event-types')
@@ -272,4 +331,4 @@ export async function deleteEventTypeAction(id: string) {
       if (error.code === 'P2002') return { error: 'URL Slug already exists' }
       return { error: 'Failed to update event type' }
     }
-  }
+}

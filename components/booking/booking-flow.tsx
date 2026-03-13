@@ -10,7 +10,7 @@ import { Clock, CalendarDays, ArrowLeft, Video, Globe, CheckCircle2 } from 'luci
 import { createBookingAction, getAvailableTimeSlots } from '@/lib/actions'
 import { EventType } from '@/lib/types'
 import { toast } from "sonner"
-
+export const dynamic = 'force-dynamic'
 export function BookingFlow({ eventType, username }: { eventType: EventType, username: string }) {
   const [date, setDate] = useState<Date | undefined>(new Date())
   const [selectedTime, setSelectedTime] = useState<string | null>(null)

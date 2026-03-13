@@ -28,10 +28,12 @@ export type AggregateEventType = {
 
 export type EventTypeAvgAggregateOutputType = {
   duration: number | null
+  bufferTime: number | null
 }
 
 export type EventTypeSumAggregateOutputType = {
   duration: number | null
+  bufferTime: number | null
 }
 
 export type EventTypeMinAggregateOutputType = {
@@ -42,6 +44,7 @@ export type EventTypeMinAggregateOutputType = {
   slug: string | null
   color: string | null
   isActive: boolean | null
+  bufferTime: number | null
   userId: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -55,6 +58,7 @@ export type EventTypeMaxAggregateOutputType = {
   slug: string | null
   color: string | null
   isActive: boolean | null
+  bufferTime: number | null
   userId: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -68,6 +72,7 @@ export type EventTypeCountAggregateOutputType = {
   slug: number
   color: number
   isActive: number
+  bufferTime: number
   userId: number
   createdAt: number
   updatedAt: number
@@ -77,10 +82,12 @@ export type EventTypeCountAggregateOutputType = {
 
 export type EventTypeAvgAggregateInputType = {
   duration?: true
+  bufferTime?: true
 }
 
 export type EventTypeSumAggregateInputType = {
   duration?: true
+  bufferTime?: true
 }
 
 export type EventTypeMinAggregateInputType = {
@@ -91,6 +98,7 @@ export type EventTypeMinAggregateInputType = {
   slug?: true
   color?: true
   isActive?: true
+  bufferTime?: true
   userId?: true
   createdAt?: true
   updatedAt?: true
@@ -104,6 +112,7 @@ export type EventTypeMaxAggregateInputType = {
   slug?: true
   color?: true
   isActive?: true
+  bufferTime?: true
   userId?: true
   createdAt?: true
   updatedAt?: true
@@ -117,6 +126,7 @@ export type EventTypeCountAggregateInputType = {
   slug?: true
   color?: true
   isActive?: true
+  bufferTime?: true
   userId?: true
   createdAt?: true
   updatedAt?: true
@@ -217,6 +227,7 @@ export type EventTypeGroupByOutputType = {
   slug: string
   color: string
   isActive: boolean
+  bufferTime: number
   userId: string
   createdAt: Date
   updatedAt: Date
@@ -253,6 +264,7 @@ export type EventTypeWhereInput = {
   slug?: Prisma.StringFilter<"EventType"> | string
   color?: Prisma.StringFilter<"EventType"> | string
   isActive?: Prisma.BoolFilter<"EventType"> | boolean
+  bufferTime?: Prisma.IntFilter<"EventType"> | number
   userId?: Prisma.StringFilter<"EventType"> | string
   createdAt?: Prisma.DateTimeFilter<"EventType"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"EventType"> | Date | string
@@ -268,6 +280,7 @@ export type EventTypeOrderByWithRelationInput = {
   slug?: Prisma.SortOrder
   color?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  bufferTime?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -286,6 +299,7 @@ export type EventTypeWhereUniqueInput = Prisma.AtLeast<{
   duration?: Prisma.IntFilter<"EventType"> | number
   color?: Prisma.StringFilter<"EventType"> | string
   isActive?: Prisma.BoolFilter<"EventType"> | boolean
+  bufferTime?: Prisma.IntFilter<"EventType"> | number
   userId?: Prisma.StringFilter<"EventType"> | string
   createdAt?: Prisma.DateTimeFilter<"EventType"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"EventType"> | Date | string
@@ -301,6 +315,7 @@ export type EventTypeOrderByWithAggregationInput = {
   slug?: Prisma.SortOrder
   color?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  bufferTime?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -322,6 +337,7 @@ export type EventTypeScalarWhereWithAggregatesInput = {
   slug?: Prisma.StringWithAggregatesFilter<"EventType"> | string
   color?: Prisma.StringWithAggregatesFilter<"EventType"> | string
   isActive?: Prisma.BoolWithAggregatesFilter<"EventType"> | boolean
+  bufferTime?: Prisma.IntWithAggregatesFilter<"EventType"> | number
   userId?: Prisma.StringWithAggregatesFilter<"EventType"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"EventType"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"EventType"> | Date | string
@@ -333,8 +349,9 @@ export type EventTypeCreateInput = {
   description?: string | null
   duration: number
   slug: string
-  color?: string
+  color: string
   isActive?: boolean
+  bufferTime?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutEventTypesInput
@@ -347,8 +364,9 @@ export type EventTypeUncheckedCreateInput = {
   description?: string | null
   duration: number
   slug: string
-  color?: string
+  color: string
   isActive?: boolean
+  bufferTime?: number
   userId: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -363,6 +381,7 @@ export type EventTypeUpdateInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   color?: Prisma.StringFieldUpdateOperationsInput | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  bufferTime?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutEventTypesNestedInput
@@ -377,6 +396,7 @@ export type EventTypeUncheckedUpdateInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   color?: Prisma.StringFieldUpdateOperationsInput | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  bufferTime?: Prisma.IntFieldUpdateOperationsInput | number
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -389,8 +409,9 @@ export type EventTypeCreateManyInput = {
   description?: string | null
   duration: number
   slug: string
-  color?: string
+  color: string
   isActive?: boolean
+  bufferTime?: number
   userId: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -404,6 +425,7 @@ export type EventTypeUpdateManyMutationInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   color?: Prisma.StringFieldUpdateOperationsInput | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  bufferTime?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -416,6 +438,7 @@ export type EventTypeUncheckedUpdateManyInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   color?: Prisma.StringFieldUpdateOperationsInput | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  bufferTime?: Prisma.IntFieldUpdateOperationsInput | number
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -439,6 +462,7 @@ export type EventTypeCountOrderByAggregateInput = {
   slug?: Prisma.SortOrder
   color?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  bufferTime?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -446,6 +470,7 @@ export type EventTypeCountOrderByAggregateInput = {
 
 export type EventTypeAvgOrderByAggregateInput = {
   duration?: Prisma.SortOrder
+  bufferTime?: Prisma.SortOrder
 }
 
 export type EventTypeMaxOrderByAggregateInput = {
@@ -456,6 +481,7 @@ export type EventTypeMaxOrderByAggregateInput = {
   slug?: Prisma.SortOrder
   color?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  bufferTime?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -469,6 +495,7 @@ export type EventTypeMinOrderByAggregateInput = {
   slug?: Prisma.SortOrder
   color?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  bufferTime?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -476,6 +503,7 @@ export type EventTypeMinOrderByAggregateInput = {
 
 export type EventTypeSumOrderByAggregateInput = {
   duration?: Prisma.SortOrder
+  bufferTime?: Prisma.SortOrder
 }
 
 export type EventTypeScalarRelationFilter = {
@@ -565,8 +593,9 @@ export type EventTypeCreateWithoutUserInput = {
   description?: string | null
   duration: number
   slug: string
-  color?: string
+  color: string
   isActive?: boolean
+  bufferTime?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   bookings?: Prisma.BookingCreateNestedManyWithoutEventTypeInput
@@ -578,8 +607,9 @@ export type EventTypeUncheckedCreateWithoutUserInput = {
   description?: string | null
   duration: number
   slug: string
-  color?: string
+  color: string
   isActive?: boolean
+  bufferTime?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   bookings?: Prisma.BookingUncheckedCreateNestedManyWithoutEventTypeInput
@@ -622,6 +652,7 @@ export type EventTypeScalarWhereInput = {
   slug?: Prisma.StringFilter<"EventType"> | string
   color?: Prisma.StringFilter<"EventType"> | string
   isActive?: Prisma.BoolFilter<"EventType"> | boolean
+  bufferTime?: Prisma.IntFilter<"EventType"> | number
   userId?: Prisma.StringFilter<"EventType"> | string
   createdAt?: Prisma.DateTimeFilter<"EventType"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"EventType"> | Date | string
@@ -633,8 +664,9 @@ export type EventTypeCreateWithoutBookingsInput = {
   description?: string | null
   duration: number
   slug: string
-  color?: string
+  color: string
   isActive?: boolean
+  bufferTime?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutEventTypesInput
@@ -646,8 +678,9 @@ export type EventTypeUncheckedCreateWithoutBookingsInput = {
   description?: string | null
   duration: number
   slug: string
-  color?: string
+  color: string
   isActive?: boolean
+  bufferTime?: number
   userId: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -677,6 +710,7 @@ export type EventTypeUpdateWithoutBookingsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   color?: Prisma.StringFieldUpdateOperationsInput | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  bufferTime?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutEventTypesNestedInput
@@ -690,6 +724,7 @@ export type EventTypeUncheckedUpdateWithoutBookingsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   color?: Prisma.StringFieldUpdateOperationsInput | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  bufferTime?: Prisma.IntFieldUpdateOperationsInput | number
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -701,8 +736,9 @@ export type EventTypeCreateManyUserInput = {
   description?: string | null
   duration: number
   slug: string
-  color?: string
+  color: string
   isActive?: boolean
+  bufferTime?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -715,6 +751,7 @@ export type EventTypeUpdateWithoutUserInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   color?: Prisma.StringFieldUpdateOperationsInput | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  bufferTime?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   bookings?: Prisma.BookingUpdateManyWithoutEventTypeNestedInput
@@ -728,6 +765,7 @@ export type EventTypeUncheckedUpdateWithoutUserInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   color?: Prisma.StringFieldUpdateOperationsInput | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  bufferTime?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   bookings?: Prisma.BookingUncheckedUpdateManyWithoutEventTypeNestedInput
@@ -741,6 +779,7 @@ export type EventTypeUncheckedUpdateManyWithoutUserInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   color?: Prisma.StringFieldUpdateOperationsInput | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  bufferTime?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -784,6 +823,7 @@ export type EventTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   slug?: boolean
   color?: boolean
   isActive?: boolean
+  bufferTime?: boolean
   userId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -800,6 +840,7 @@ export type EventTypeSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   slug?: boolean
   color?: boolean
   isActive?: boolean
+  bufferTime?: boolean
   userId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -814,6 +855,7 @@ export type EventTypeSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   slug?: boolean
   color?: boolean
   isActive?: boolean
+  bufferTime?: boolean
   userId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -828,12 +870,13 @@ export type EventTypeSelectScalar = {
   slug?: boolean
   color?: boolean
   isActive?: boolean
+  bufferTime?: boolean
   userId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type EventTypeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "duration" | "slug" | "color" | "isActive" | "userId" | "createdAt" | "updatedAt", ExtArgs["result"]["eventType"]>
+export type EventTypeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "duration" | "slug" | "color" | "isActive" | "bufferTime" | "userId" | "createdAt" | "updatedAt", ExtArgs["result"]["eventType"]>
 export type EventTypeInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   bookings?: boolean | Prisma.EventType$bookingsArgs<ExtArgs>
@@ -860,6 +903,7 @@ export type $EventTypePayload<ExtArgs extends runtime.Types.Extensions.InternalA
     slug: string
     color: string
     isActive: boolean
+    bufferTime: number
     userId: string
     createdAt: Date
     updatedAt: Date
@@ -1295,6 +1339,7 @@ export interface EventTypeFieldRefs {
   readonly slug: Prisma.FieldRef<"EventType", 'String'>
   readonly color: Prisma.FieldRef<"EventType", 'String'>
   readonly isActive: Prisma.FieldRef<"EventType", 'Boolean'>
+  readonly bufferTime: Prisma.FieldRef<"EventType", 'Int'>
   readonly userId: Prisma.FieldRef<"EventType", 'String'>
   readonly createdAt: Prisma.FieldRef<"EventType", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"EventType", 'DateTime'>
