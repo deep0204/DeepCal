@@ -70,6 +70,7 @@ export function EventTypeForm({ initialData }: { initialData?: EventType }) {
     }
 
     toast.success(initialData ? "Event type updated!" : "Event type created!")
+    router.refresh()
     router.push('/dashboard/event-types')
   }
 

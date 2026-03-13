@@ -36,6 +36,7 @@ export async function createEventTypeAction(data: {
 
     // This tells Next.js to instantly clear the cache and refresh the dashboard UI
     revalidatePath('/dashboard/event-types')
+    revalidatePath('/dashboard/bookings')
     return { success: true }
   } catch (error: any) {
     if (error.code === 'P2002') return { error: 'URL Slug already exists' }
