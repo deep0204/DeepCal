@@ -212,11 +212,11 @@ export function EventTypesList({ eventTypes, username }: EventTypesListProps) {
   }
 
   const handleDelete = async (id: string) => {
-    if (window.confirm("Are you sure you want to delete this event type? This will also delete all bookings associated with it.")) {
+    
       const result = await deleteEventTypeAction(id)
       if (result?.error) toast.error(result.error)
       else toast.success("Event type deleted!")
-    }
+    
   }
 
   if (eventTypes.length === 0) {
