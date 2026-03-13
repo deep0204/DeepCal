@@ -286,6 +286,7 @@ export async function deleteEventTypeAction(id: string) {
     try {
       await prisma.eventType.delete({ where: { id } })
       revalidatePath('/dashboard/event-types')
+      revalidatePath('/dashboard/bookings')
       return { success: true }
     } catch (error) {
       return { error: 'Failed to delete event type' }
@@ -326,6 +327,7 @@ export async function updateEventTypeAction(id: string, data: {
         }
       })
       revalidatePath('/dashboard/event-types')
+      revalidatePath('/dashboard/bookings')
       return { success: true }
     } catch (error: any) {
       if (error.code === 'P2002') return { error: 'URL Slug already exists' }
