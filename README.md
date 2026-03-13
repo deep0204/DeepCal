@@ -1,36 +1,52 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🗓️ DeepCal - Modern Scheduling Infrastructure
 
-## Getting Started
+DeepCal is a full-stack, high-performance scheduling platform inspired by Cal.com and Calendly. It allows users to create custom event types, set availability, and let guests book time slots without the back-and-forth emails. 
 
-First, run the development server:
+**🚀 Live Demo:** [https://deep-cal.vercel.app/]
 
+---
+
+## ✨ Core Features
+
+* **Smart Time-Slot Generation:** An algorithmic scheduling engine that calculates available slots on the fly, preventing any possibility of double-booking.
+* **The "Force Field" Buffer System:** Automatically blocks out custom rest periods (e.g., 15 minutes) before and after meetings to prevent burnout.
+* **Dynamic Event Types:** Create multiple meeting types (e.g., 15-min Quick Chat, 60-min Deep Work) with custom URLs, durations, and color-coding.
+* **Real-Time Email Confirmations:** Integrated with Resend API to automatically fire beautifully formatted HTML email confirmations to guests upon booking.
+* **Availability Management:** Set standard weekly working hours that dictate the baseline schedule.
+* **Modern Dashboard:** Built with a sticky sidebar, fully responsive mobile design, and an automatic Light/Dark theme toggle.
+
+---
+
+## 🛠️ Tech Stack
+
+* **Framework:** Next.js 14 (App Router)
+* **Language:** TypeScript
+* **Database:** PostgreSQL (Hosted on Neon Serverless)
+* **ORM:** Prisma
+* **Styling:** Tailwind CSS + Shadcn UI
+* **Emails:** Resend API
+* **Deployment:** Vercel
+
+---
+
+## 🧠 Architecture Insight: Where is Express.js?
+
+If you are looking for an Express.js server folder in this repository, you won't find one! 
+
+DeepCal is built using the bleeding-edge **Next.js App Router** architecture. Instead of spinning up a separate Express.js backend and writing traditional REST API endpoints (`app.get`, `app.post`), this project utilizes **Next.js Server Actions**.
+
+**Why this is better:**
+1. **Zero API Boilerplate:** Frontend forms call asynchronous server functions directly (`'use server'`).
+2. **End-to-End Type Safety:** TypeScript interfaces are shared seamlessly between the database schema and the client UI. If a database column changes (like adding `bufferTime`), the frontend instantly knows about it.
+3. **Reduced Latency:** The server and frontend are tightly coupled in a single deployment on Vercel, removing the network hop between a separate frontend host and an Express backend host.
+
+---
+
+## ⚙️ Local Setup & Installation
+
+Want to run DeepCal on your local machine? Follow these steps:
+
+**1. Clone the repository**
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+git clone [https://github.com/yourusername/deepcal.git](https://github.com/yourusername/deepcal.git)
+cd deepcal
