@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Plus, Trash2, Calendar } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { updateAvailabilityAction } from '@/lib/actions'
+import { toast } from "sonner"
 
 interface AvailabilitySettingsProps {
   availability: Availability | null
@@ -76,7 +77,7 @@ export function AvailabilitySettings({ availability, schedules, dateOverrides }:
     if (result.error) {
       alert(`Error: ${result.error}`)
     } else {
-      alert("Availability Settings Saved Successfully!")
+      toast.success("Availability Settings Saved Successfully!")
     }
     
     setSaving(false)

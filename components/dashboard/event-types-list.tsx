@@ -16,6 +16,17 @@ import { Switch } from '@/components/ui/switch'
 import { deleteEventTypeAction, toggleEventTypeActiveAction } from '@/lib/actions'
 import { toast } from "sonner"
 import { useState } from 'react'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 interface EventTypesListProps {
   eventTypes: EventType[]
@@ -24,14 +35,14 @@ interface EventTypesListProps {
 
 // 1. We extracted the individual card into its own component!
 // This gives each toggle switch its own personal state to react instantly.
-function EventTypeCard({ 
-  eventType, 
-  username, 
-  onCopy, 
-  onDelete 
-}: { 
-  eventType: EventType, 
-  username: string, 
+function EventTypeCard({
+  eventType,
+  username,
+  onCopy,
+  onDelete
+}: {
+  eventType: EventType,
+  username: string,
   onCopy: (slug: string) => void,
   onDelete: (id: string) => void
 }) {
@@ -44,7 +55,7 @@ function EventTypeCard({
 
     // Fire the server action in the background
     const result = await toggleEventTypeActiveAction(eventType.id, newCheckedStatus)
-    
+
     // If the database fails, revert the switch and show an error
     if (result?.error) {
       setIsActive(!newCheckedStatus)
@@ -58,7 +69,7 @@ function EventTypeCard({
     <Card className="group transition-all bg-card border-border/50 shadow-none hover:border-border overflow-hidden w-full">
       <CardContent className="p-0">
         <div className="flex items-stretch w-full">
-          
+
           <div
             className="w-1.5 shrink-0"
             style={{ backgroundColor: eventType.color }}
@@ -67,7 +78,7 @@ function EventTypeCard({
           <div className="flex-1 min-w-0 p-4 sm:p-5 flex justify-between items-start gap-2 sm:gap-4">
 
             <div className="flex-1 min-w-0 flex flex-col">
-              
+
               <div className="flex items-center gap-2 min-w-0 mb-1.5 w-full">
                 <Link
                   href={`/dashboard/event-types/${eventType.id}`}
@@ -129,13 +140,32 @@ function EventTypeCard({
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem 
-                    className="text-destructive focus:text-destructive cursor-pointer"
-                    onClick={() => onDelete(eventType.id)}
-                  >
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    Delete
-                  </DropdownMenuItem>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <div className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-destructive hover:text-destructive-foreground focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 text-destructive">
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete
+                      </div>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This action cannot be undone. This will permanently delete the
+                          <strong> {eventType.title}</strong> event type and all associated bookings.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => onDelete(eventType.id)}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                          Delete Event
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
@@ -171,8 +201,8 @@ export function EventTypesList({ eventTypes, username }: EventTypesListProps) {
       document.body.appendChild(textArea)
       textArea.focus()
       textArea.select()
-      
-      document.execCommand('copy') 
+
+      document.execCommand('copy')
       textArea.remove()
       toast.success("Link copied to clipboard!")
     } catch (err) {
@@ -211,9 +241,9 @@ export function EventTypesList({ eventTypes, username }: EventTypesListProps) {
   return (
     <div className="space-y-4 w-full max-w-full">
       {eventTypes.map((eventType) => (
-        <EventTypeCard 
-          key={eventType.id} 
-          eventType={eventType} 
+        <EventTypeCard
+          key={eventType.id}
+          eventType={eventType}
           username={username}
           onCopy={copyLink}
           onDelete={handleDelete}

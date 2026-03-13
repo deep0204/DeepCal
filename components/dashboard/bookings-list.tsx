@@ -23,7 +23,17 @@ import { Label } from '@/components/ui/label'
 import { Calendar, Clock, Mail, MoreVertical, User, X, CalendarDays } from 'lucide-react'
 import { cancelBookingAction } from '@/lib/actions'
 import { toast } from "sonner"
-
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 interface BookingsListProps {
   bookings: Booking[]
   type: 'upcoming' | 'past' | 'cancelled'
