@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
 import Link from 'next/link'
 import prisma from '@/lib/prisma'
-
+export const dynamic = 'force-dynamic'
 export default async function EventTypesPage() {
   const user = await prisma.user.findUnique({
     where: { username: 'defaultuser' }
