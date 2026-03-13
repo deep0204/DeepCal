@@ -1,19 +1,49 @@
 # 🗓️ DeepCal - Modern Scheduling Infrastructure
 
-DeepCal is a full-stack, high-performance scheduling platform inspired by Cal.com and Calendly. It allows users to create custom event types, set availability, and let guests book time slots without the back-and-forth emails. 
-
 **🚀 Live Demo:** [https://deep-cal.vercel.app/]
+
+DeepCal is a full-stack scheduling platform meticulously designed to replicate the sleek, user-centric interface and functionality of **Cal.com**. It empowers users to define availability, create custom event types, and seamlessly manage incoming bookings without the back-and-forth of traditional email scheduling.
 
 ---
 
-## ✨ Core Features
+## ✨ Core Features & UI Implementation
 
-* **Smart Time-Slot Generation:** An algorithmic scheduling engine that calculates available slots on the fly, preventing any possibility of double-booking.
-* **The "Force Field" Buffer System:** Automatically blocks out custom rest periods (e.g., 15 minutes) before and after meetings to prevent burnout.
-* **Dynamic Event Types:** Create multiple meeting types (e.g., 15-min Quick Chat, 60-min Deep Work) with custom URLs, durations, and color-coding.
-* **Real-Time Email Confirmations:** Integrated with Resend API to automatically fire beautifully formatted HTML email confirmations to guests upon booking.
-* **Availability Management:** Set standard weekly working hours that dictate the baseline schedule.
-* **Modern Dashboard:** Built with a sticky sidebar, fully responsive mobile design, and an automatic Light/Dark theme toggle.
+* **Cal.com UI/UX Architecture:** The interface patterns, typography, sticky sidebars, and clean dashboard layouts were heavily inspired by studying Cal.com's live design system to ensure a premium, intuitive user experience.
+* **Conflict-Free Scheduling Engine:** A robust, dynamic algorithm calculates available time slots on the fly. It cross-references the host's base availability with existing database bookings to guarantee zero double-bookings.
+* **The "Force Field" Buffer System:** Advanced padding logic that automatically enforces custom rest periods (e.g., 5, 15, or 30 minutes) before and after scheduled meetings to prevent burnout and back-to-back overlaps.
+* **Dynamic Event Type Management:** Support for generating multiple meeting configurations. Users can customize durations, set unique URL slugs, and assign color identifiers for visual organization.
+* **Automated Email Confirmations (Resend API):** Integrated with Resend to deliver beautifully formatted HTML confirmation emails instantly upon booking. 
+  * *Note on API Limitations:* Due to the Resend Free Tier strict anti-spam policies and API cost constraints, automated emails are currently restricted to sending only to the developer's verified email address. In a production environment with a paid tier, this dynamically scales to any guest email.
+* **Granular Availability Controls:** A matrix-style availability manager allowing the host to dictate their exact weekly working hours.
+* **Theme Customization:** Seamless Light/Dark mode toggling built into the dashboard for accessibility and user preference.
+
+---
+
+## 📌 Assumptions Made (As per Requirements)
+
+* **Authentication Bypass:** No user login system (like NextAuth or Clerk) has been implemented. The system operates under the assumption that a `defaultuser` is continuously logged into the admin dashboard side.
+* **Public Access:** The public-facing booking page (`/[username]`) is accessible to anyone on the internet without requiring them to create a guest account.
+* **Pre-seeded Environment:** The database contains sample event types and dummy bookings to demonstrate immediate functionality upon evaluation.
+
+---
+
+## 🗄️ Database Design (Prisma + PostgreSQL)
+
+The database schema was custom-designed from scratch to handle relational scheduling logic efficiently. The core tables include:
+1. **User:** Holds the primary account (`defaultuser`) and their baseline settings.
+2. **EventType:** Relates to the User. Stores meeting metadata (Title, Duration, URL Slug, Color, and Buffer Times).
+3. **Availability:** Relates to the User. Stores a 7-day schedule matrix indicating which days/hours the user is actively accepting meetings.
+4. **Booking:** Relates to the EventType. Stores guest details, meeting start/end times, and status (Upcoming/Cancelled).
+
+*Note: The scheduling algorithm uses these relational tables to dynamically calculate overlaps and enforce buffer times on the fly.*
+
+---
+
+## 🧠 Architecture Choice (Next.js App Router)
+
+This project utilizes the unified **Next.js App Router** architecture rather than a traditional decoupled setup (React frontend + separate Express.js server). 
+
+By leveraging **Next.js Server Actions**, backend logic and database queries are executed securely within the same codebase. This architectural choice provides end-to-end type safety between the Prisma schema and the frontend components, eliminates REST API boilerplate, and reduces latency by hosting both client and server logic in a single serverless Vercel deployment.
 
 ---
 
@@ -29,22 +59,7 @@ DeepCal is a full-stack, high-performance scheduling platform inspired by Cal.co
 
 ---
 
-## 🧠 Architecture Insight: Where is Express.js?
-
-If you are looking for an Express.js server folder in this repository, you won't find one! 
-
-DeepCal is built using the bleeding-edge **Next.js App Router** architecture. Instead of spinning up a separate Express.js backend and writing traditional REST API endpoints (`app.get`, `app.post`), this project utilizes **Next.js Server Actions**.
-
-**Why this is better:**
-1. **Zero API Boilerplate:** Frontend forms call asynchronous server functions directly (`'use server'`).
-2. **End-to-End Type Safety:** TypeScript interfaces are shared seamlessly between the database schema and the client UI. If a database column changes (like adding `bufferTime`), the frontend instantly knows about it.
-3. **Reduced Latency:** The server and frontend are tightly coupled in a single deployment on Vercel, removing the network hop between a separate frontend host and an Express backend host.
-
----
-
 ## ⚙️ Local Setup & Installation
-
-Want to run DeepCal on your local machine? Follow these steps:
 
 **1. Clone the repository**
 ```bash
