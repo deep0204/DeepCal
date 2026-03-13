@@ -27,7 +27,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-
+export const dynamic = 'force-dynamic'
 interface EventTypesListProps {
   eventTypes: EventType[]
   username: string

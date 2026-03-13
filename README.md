@@ -6,7 +6,7 @@ DeepCal is a full-stack scheduling platform meticulously designed to replicate t
 
 ---
 
-## ✨ Core Features & UI Implementation
+## ✨ Core Features & UI Implementation :
 
 * **Cal.com UI/UX Architecture:** The interface patterns, typography, sticky sidebars, and clean dashboard layouts were heavily inspired by studying Cal.com's live design system to ensure a premium, intuitive user experience.
 * **Conflict-Free Scheduling Engine:** A robust, dynamic algorithm calculates available time slots on the fly. It cross-references the host's base availability with existing database bookings to guarantee zero double-bookings.
