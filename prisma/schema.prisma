@@ -1,0 +1,61 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+datasource db {
+  provider = "postgresql"
+}
+
+// The default admin user (since no login is required)
+model User {
+  id           String         @id @default(cuid())
+  email        String         @unique
+  username     String         @unique
+  timezone     String         @default("Asia/Kolkata")
+  eventTypes   EventType[]
+  availability Availability[]
+}
+
+// The different meeting types (e.g., 15 Min Chat)
+model EventType {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  duration    Int
+  slug        String    @unique
+  color       String    @default("#ffffff")
+  isActive    Boolean   @default(true)
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bookings    Booking[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+// Working hours for the user
+model Availability {
+  id          String  @id @default(cuid())
+  dayOfWeek   Int     // 0 = Sunday, 1 = Monday, etc.
+  startTime   String  // e.g., "09:00"
+  endTime     String  // e.g., "17:00"
+  isActive    Boolean @default(true)
+  userId      String
+  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, dayOfWeek]) // Ensures only one schedule per day per user
+}
+
+// The actual scheduled meetings
+model Booking {
+  id                  String    @id @default(cuid())
+  eventTypeId         String
+  eventType           EventType @relation(fields: [eventTypeId], references: [id], onDelete: Cascade)
+  startTime           DateTime
+  endTime             DateTime
+  guestName           String
+  guestEmail          String
+  guestNotes          String?
+  status              String    @default("upcoming") // upcoming, past, cancelled
+  cancellationReason  String?
+  createdAt           DateTime  @default(now())
+}
