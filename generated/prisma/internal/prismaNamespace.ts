@@ -387,7 +387,8 @@ export const ModelName = {
   User: 'User',
   EventType: 'EventType',
   Availability: 'Availability',
-  Booking: 'Booking'
+  Booking: 'Booking',
+  DateOverride: 'DateOverride'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -403,7 +404,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "eventType" | "availability" | "booking"
+    modelProps: "user" | "eventType" | "availability" | "booking" | "dateOverride"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -703,6 +704,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    DateOverride: {
+      payload: Prisma.$DateOverridePayload<ExtArgs>
+      fields: Prisma.DateOverrideFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.DateOverrideFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DateOverridePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.DateOverrideFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DateOverridePayload>
+        }
+        findFirst: {
+          args: Prisma.DateOverrideFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DateOverridePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.DateOverrideFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DateOverridePayload>
+        }
+        findMany: {
+          args: Prisma.DateOverrideFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DateOverridePayload>[]
+        }
+        create: {
+          args: Prisma.DateOverrideCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DateOverridePayload>
+        }
+        createMany: {
+          args: Prisma.DateOverrideCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.DateOverrideCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DateOverridePayload>[]
+        }
+        delete: {
+          args: Prisma.DateOverrideDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DateOverridePayload>
+        }
+        update: {
+          args: Prisma.DateOverrideUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DateOverridePayload>
+        }
+        deleteMany: {
+          args: Prisma.DateOverrideDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.DateOverrideUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.DateOverrideUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DateOverridePayload>[]
+        }
+        upsert: {
+          args: Prisma.DateOverrideUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DateOverridePayload>
+        }
+        aggregate: {
+          args: Prisma.DateOverrideAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateDateOverride>
+        }
+        groupBy: {
+          args: Prisma.DateOverrideGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DateOverrideGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.DateOverrideCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DateOverrideCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -795,6 +870,18 @@ export const BookingScalarFieldEnum = {
 } as const
 
 export type BookingScalarFieldEnum = (typeof BookingScalarFieldEnum)[keyof typeof BookingScalarFieldEnum]
+
+
+export const DateOverrideScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  date: 'date',
+  startTime: 'startTime',
+  endTime: 'endTime',
+  isUnavailable: 'isUnavailable'
+} as const
+
+export type DateOverrideScalarFieldEnum = (typeof DateOverrideScalarFieldEnum)[keyof typeof DateOverrideScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -988,6 +1075,7 @@ export type GlobalOmitConfig = {
   eventType?: Prisma.EventTypeOmit
   availability?: Prisma.AvailabilityOmit
   booking?: Prisma.BookingOmit
+  dateOverride?: Prisma.DateOverrideOmit
 }
 
 /* Types for Logging */

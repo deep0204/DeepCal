@@ -165,15 +165,42 @@ export async function createBookingAction(data: {
 }
 
 export async function getAvailableTimeSlots(eventTypeId: string, dateStr: string) {
-    try {
-      const targetDate = new Date(dateStr)
-      const dayOfWeek = targetDate.getDay()
-  
-      const eventType = await prisma.eventType.findUnique({ 
-        where: { id: eventTypeId } 
-      })
-      if (!eventType) throw new Error("Event type not found")
-  
+  try {
+    const targetDate = new Date(dateStr)
+    const dayOfWeek = targetDate.getDay()
+
+    const eventType = await prisma.eventType.findUnique({ 
+      where: { id: eventTypeId } 
+    })
+    if (!eventType) throw new Error("Event type not found")
+
+    // Setup day boundaries for DB queries
+    const startOfDay = new Date(targetDate)
+    startOfDay.setHours(0, 0, 0, 0)
+    
+    const endOfDay = new Date(targetDate)
+    endOfDay.setHours(23, 59, 59, 999)
+
+    // 🛡️ THE OVERRIDE CHECK: Does this specific date have an override?
+    const dateOverride = await prisma.dateOverride.findFirst({
+      where: {
+        userId: eventType.userId,
+        date: { gte: startOfDay, lte: endOfDay }
+      }
+    })
+
+    let activeStartTime = ""
+    let activeEndTime = ""
+
+    if (dateOverride) {
+      // If marked totally unavailable, instantly return NO SLOTS!
+      if (dateOverride.isUnavailable) return []
+
+      // Otherwise, use their custom hours for this specific day
+      activeStartTime = dateOverride.startTime!
+      activeEndTime = dateOverride.endTime!
+    } else {
+      // FALLBACK: No override found, use the standard weekly schedule
       const schedule = await prisma.availability.findUnique({
         where: {
           userId_dayOfWeek: { userId: eventType.userId, dayOfWeek }
@@ -181,86 +208,80 @@ export async function getAvailableTimeSlots(eventTypeId: string, dateStr: string
       })
   
       if (!schedule || !schedule.isActive) return []
-  
-      const startOfDay = new Date(targetDate)
-      startOfDay.setHours(0, 0, 0, 0)
-      
-      const endOfDay = new Date(targetDate)
-      endOfDay.setHours(23, 59, 59, 999)
-  
-      const existingBookings = await prisma.booking.findMany({
-        where: {
-          eventType: { userId: eventType.userId },
-          startTime: { gte: startOfDay },
-          endTime: { lte: endOfDay },
-          status: { not: 'cancelled' } 
-        }
-      })
-  
-      const availableSlots: string[] = []
-      
-      const [startHour, startMin] = schedule.startTime.split(':').map(Number)
-      const [endHour, endMin] = schedule.endTime.split(':').map(Number)
-  
-      const currentTime = new Date(targetDate)
-      currentTime.setHours(startHour, startMin, 0, 0)
-  
-      const endOfWorkDay = new Date(targetDate)
-      endOfWorkDay.setHours(endHour, endMin, 0, 0)
-  
-      const now = new Date()
-      
-      // Calculate the buffer in milliseconds
-      const bufferMs = (eventType.bufferTime || 0) * 60000
 
-      while (currentTime < endOfWorkDay) {
-        const slotEndTime = new Date(currentTime.getTime() + eventType.duration * 60000)
-  
-        if (slotEndTime > endOfWorkDay) break
-  
-        let jumpToTime: Date | null = null
-  
-        // 🛡️ THE FORCE FIELD WITH SMART JUMP TRACKING
-        const isOverlapping = existingBookings.some((booking) => {
-          const blockedStart = new Date(booking.startTime.getTime() - bufferMs)
-          const blockedEnd = new Date(booking.endTime.getTime() + bufferMs)
-
-          if (
-            (currentTime >= blockedStart && currentTime < blockedEnd) ||
-            (slotEndTime > blockedStart && slotEndTime <= blockedEnd) ||
-            (currentTime <= blockedStart && slotEndTime >= blockedEnd)
-          ) {
-            // We hit a block! Tell the algorithm exactly when this block ends
-            jumpToTime = blockedEnd
-            return true
-          }
-          return false
-        })
-  
-        const isPast = currentTime < now
-  
-        if (!isOverlapping && !isPast) {
-          // Slot is fully available!
-          availableSlots.push(
-            currentTime.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' })
-          )
-          // Normal step by duration
-          currentTime.setTime(currentTime.getTime() + eventType.duration * 60000)
-        } else if (jumpToTime) {
-          // SMART JUMP: Fast-forward the grid to start exactly when the buffer clears!
-          currentTime.setTime((jumpToTime as Date).getTime())
-        } else {
-          // If it was just in the past, step normally
-          currentTime.setTime(currentTime.getTime() + eventType.duration * 60000)
-        }
-      }
-  
-      return availableSlots
-  
-    } catch (error) {
-      console.error("Failed to generate time slots:", error)
-      return []
+      activeStartTime = schedule.startTime
+      activeEndTime = schedule.endTime
     }
+
+    const existingBookings = await prisma.booking.findMany({
+      where: {
+        eventType: { userId: eventType.userId },
+        startTime: { gte: startOfDay },
+        endTime: { lte: endOfDay },
+        status: { not: 'cancelled' } 
+      }
+    })
+
+    const availableSlots: string[] = []
+    
+    // Use the dynamically decided active start/end times!
+    const [startHour, startMin] = activeStartTime.split(':').map(Number)
+    const [endHour, endMin] = activeEndTime.split(':').map(Number)
+
+    const currentTime = new Date(targetDate)
+    currentTime.setHours(startHour, startMin, 0, 0)
+
+    const endOfWorkDay = new Date(targetDate)
+    endOfWorkDay.setHours(endHour, endMin, 0, 0)
+
+    const now = new Date()
+    
+    // Calculate the buffer in milliseconds
+    const bufferMs = (eventType.bufferTime || 0) * 60000
+
+    while (currentTime < endOfWorkDay) {
+      const slotEndTime = new Date(currentTime.getTime() + eventType.duration * 60000)
+
+      if (slotEndTime > endOfWorkDay) break
+
+      let jumpToTime: Date | null = null
+
+      // 🛡️ THE FORCE FIELD WITH SMART JUMP TRACKING
+      const isOverlapping = existingBookings.some((booking) => {
+        const blockedStart = new Date(booking.startTime.getTime() - bufferMs)
+        const blockedEnd = new Date(booking.endTime.getTime() + bufferMs)
+
+        if (
+          (currentTime >= blockedStart && currentTime < blockedEnd) ||
+          (slotEndTime > blockedStart && slotEndTime <= blockedEnd) ||
+          (currentTime <= blockedStart && slotEndTime >= blockedEnd)
+        ) {
+          jumpToTime = blockedEnd
+          return true
+        }
+        return false
+      })
+
+      const isPast = currentTime < now
+
+      if (!isOverlapping && !isPast) {
+        availableSlots.push(
+          currentTime.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' })
+        )
+        currentTime.setTime(currentTime.getTime() + eventType.duration * 60000)
+      } else if (jumpToTime) {
+        currentTime.setTime((jumpToTime as Date).getTime())
+      } else {
+        currentTime.setTime(currentTime.getTime() + eventType.duration * 60000)
+      }
+    }
+
+    return availableSlots
+
+  } catch (error) {
+    console.error("Failed to generate time slots:", error)
+    return []
+  }
 }
 
 export async function cancelBookingAction(bookingId: string, reason: string) {
@@ -334,4 +355,76 @@ export async function updateEventTypeAction(id: string, data: {
       if (error.code === 'P2002') return { error: 'URL Slug already exists' }
       return { error: 'Failed to update event type' }
     }
+}
+export async function addDateOverrideAction(data: {
+  date: string;
+  startTime?: string;
+  endTime?: string;
+  isUnavailable: boolean;
+}) {
+  try {
+    // Note: Assuming 'defaultuser' as per the assignment rules
+    const user = await prisma.user.findUnique({ where: { username: 'defaultuser' } })
+    if (!user) return { error: "User not found" }
+
+    // Convert the YYYY-MM-DD string to a proper DateTime object
+    const overrideDate = new Date(data.date)
+
+    await prisma.dateOverride.upsert({
+      where: {
+        userId_date: {
+          userId: user.id,
+          date: overrideDate
+        }
+      },
+      update: {
+        startTime: data.isUnavailable ? null : data.startTime,
+        endTime: data.isUnavailable ? null : data.endTime,
+        isUnavailable: data.isUnavailable,
+      },
+      create: {
+        userId: user.id,
+        date: overrideDate,
+        startTime: data.isUnavailable ? null : data.startTime,
+        endTime: data.isUnavailable ? null : data.endTime,
+        isUnavailable: data.isUnavailable,
+      }
+    })
+
+    revalidatePath('/dashboard/availability')
+    revalidatePath('/[username]', 'layout')
+
+    return { success: true }
+  } catch (error) {
+    console.error(error)
+    return { error: "Failed to set date override" }
+  }
+}
+
+export async function deleteDateOverrideAction(id: string) {
+  try {
+    await prisma.dateOverride.delete({ where: { id } })
+    revalidatePath('/dashboard/availability')
+    revalidatePath('/[username]', 'layout')
+    return { success: true }
+  } catch (error) {
+    return { error: "Failed to delete date override" }
+  }
+}
+export async function updateTimezoneAction(newTimezone: string) {
+  try {
+    // Assuming 'defaultuser' is the username you are using for the assignment bypass
+    await prisma.user.update({
+      where: { username: 'defaultuser' }, 
+      data: { timezone: newTimezone }
+    })
+    
+    revalidatePath('/dashboard/availability')
+    revalidatePath('/[username]', 'layout') // Clear public pages too
+    
+    return { success: true }
+  } catch (error) {
+    console.error(error)
+    return { error: 'Failed to update timezone' }
+  }
 }

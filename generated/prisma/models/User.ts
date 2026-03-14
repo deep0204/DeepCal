@@ -176,6 +176,7 @@ export type UserWhereInput = {
   timezone?: Prisma.StringFilter<"User"> | string
   eventTypes?: Prisma.EventTypeListRelationFilter
   availability?: Prisma.AvailabilityListRelationFilter
+  dateOverrides?: Prisma.DateOverrideListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -185,6 +186,7 @@ export type UserOrderByWithRelationInput = {
   timezone?: Prisma.SortOrder
   eventTypes?: Prisma.EventTypeOrderByRelationAggregateInput
   availability?: Prisma.AvailabilityOrderByRelationAggregateInput
+  dateOverrides?: Prisma.DateOverrideOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -197,6 +199,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   timezone?: Prisma.StringFilter<"User"> | string
   eventTypes?: Prisma.EventTypeListRelationFilter
   availability?: Prisma.AvailabilityListRelationFilter
+  dateOverrides?: Prisma.DateOverrideListRelationFilter
 }, "id" | "email" | "username">
 
 export type UserOrderByWithAggregationInput = {
@@ -226,6 +229,7 @@ export type UserCreateInput = {
   timezone?: string
   eventTypes?: Prisma.EventTypeCreateNestedManyWithoutUserInput
   availability?: Prisma.AvailabilityCreateNestedManyWithoutUserInput
+  dateOverrides?: Prisma.DateOverrideCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -235,6 +239,7 @@ export type UserUncheckedCreateInput = {
   timezone?: string
   eventTypes?: Prisma.EventTypeUncheckedCreateNestedManyWithoutUserInput
   availability?: Prisma.AvailabilityUncheckedCreateNestedManyWithoutUserInput
+  dateOverrides?: Prisma.DateOverrideUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -244,6 +249,7 @@ export type UserUpdateInput = {
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
   eventTypes?: Prisma.EventTypeUpdateManyWithoutUserNestedInput
   availability?: Prisma.AvailabilityUpdateManyWithoutUserNestedInput
+  dateOverrides?: Prisma.DateOverrideUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -253,6 +259,7 @@ export type UserUncheckedUpdateInput = {
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
   eventTypes?: Prisma.EventTypeUncheckedUpdateManyWithoutUserNestedInput
   availability?: Prisma.AvailabilityUncheckedUpdateManyWithoutUserNestedInput
+  dateOverrides?: Prisma.DateOverrideUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -334,12 +341,27 @@ export type UserUpdateOneRequiredWithoutAvailabilityNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAvailabilityInput, Prisma.UserUpdateWithoutAvailabilityInput>, Prisma.UserUncheckedUpdateWithoutAvailabilityInput>
 }
 
+export type UserCreateNestedOneWithoutDateOverridesInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutDateOverridesInput, Prisma.UserUncheckedCreateWithoutDateOverridesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutDateOverridesInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutDateOverridesNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutDateOverridesInput, Prisma.UserUncheckedCreateWithoutDateOverridesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutDateOverridesInput
+  upsert?: Prisma.UserUpsertWithoutDateOverridesInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutDateOverridesInput, Prisma.UserUpdateWithoutDateOverridesInput>, Prisma.UserUncheckedUpdateWithoutDateOverridesInput>
+}
+
 export type UserCreateWithoutEventTypesInput = {
   id?: string
   email: string
   username: string
   timezone?: string
   availability?: Prisma.AvailabilityCreateNestedManyWithoutUserInput
+  dateOverrides?: Prisma.DateOverrideCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutEventTypesInput = {
@@ -348,6 +370,7 @@ export type UserUncheckedCreateWithoutEventTypesInput = {
   username: string
   timezone?: string
   availability?: Prisma.AvailabilityUncheckedCreateNestedManyWithoutUserInput
+  dateOverrides?: Prisma.DateOverrideUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutEventTypesInput = {
@@ -372,6 +395,7 @@ export type UserUpdateWithoutEventTypesInput = {
   username?: Prisma.StringFieldUpdateOperationsInput | string
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
   availability?: Prisma.AvailabilityUpdateManyWithoutUserNestedInput
+  dateOverrides?: Prisma.DateOverrideUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutEventTypesInput = {
@@ -380,6 +404,7 @@ export type UserUncheckedUpdateWithoutEventTypesInput = {
   username?: Prisma.StringFieldUpdateOperationsInput | string
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
   availability?: Prisma.AvailabilityUncheckedUpdateManyWithoutUserNestedInput
+  dateOverrides?: Prisma.DateOverrideUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAvailabilityInput = {
@@ -388,6 +413,7 @@ export type UserCreateWithoutAvailabilityInput = {
   username: string
   timezone?: string
   eventTypes?: Prisma.EventTypeCreateNestedManyWithoutUserInput
+  dateOverrides?: Prisma.DateOverrideCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAvailabilityInput = {
@@ -396,6 +422,7 @@ export type UserUncheckedCreateWithoutAvailabilityInput = {
   username: string
   timezone?: string
   eventTypes?: Prisma.EventTypeUncheckedCreateNestedManyWithoutUserInput
+  dateOverrides?: Prisma.DateOverrideUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAvailabilityInput = {
@@ -420,6 +447,7 @@ export type UserUpdateWithoutAvailabilityInput = {
   username?: Prisma.StringFieldUpdateOperationsInput | string
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
   eventTypes?: Prisma.EventTypeUpdateManyWithoutUserNestedInput
+  dateOverrides?: Prisma.DateOverrideUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAvailabilityInput = {
@@ -428,6 +456,59 @@ export type UserUncheckedUpdateWithoutAvailabilityInput = {
   username?: Prisma.StringFieldUpdateOperationsInput | string
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
   eventTypes?: Prisma.EventTypeUncheckedUpdateManyWithoutUserNestedInput
+  dateOverrides?: Prisma.DateOverrideUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutDateOverridesInput = {
+  id?: string
+  email: string
+  username: string
+  timezone?: string
+  eventTypes?: Prisma.EventTypeCreateNestedManyWithoutUserInput
+  availability?: Prisma.AvailabilityCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutDateOverridesInput = {
+  id?: string
+  email: string
+  username: string
+  timezone?: string
+  eventTypes?: Prisma.EventTypeUncheckedCreateNestedManyWithoutUserInput
+  availability?: Prisma.AvailabilityUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutDateOverridesInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutDateOverridesInput, Prisma.UserUncheckedCreateWithoutDateOverridesInput>
+}
+
+export type UserUpsertWithoutDateOverridesInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutDateOverridesInput, Prisma.UserUncheckedUpdateWithoutDateOverridesInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutDateOverridesInput, Prisma.UserUncheckedCreateWithoutDateOverridesInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutDateOverridesInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutDateOverridesInput, Prisma.UserUncheckedUpdateWithoutDateOverridesInput>
+}
+
+export type UserUpdateWithoutDateOverridesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  eventTypes?: Prisma.EventTypeUpdateManyWithoutUserNestedInput
+  availability?: Prisma.AvailabilityUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutDateOverridesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  eventTypes?: Prisma.EventTypeUncheckedUpdateManyWithoutUserNestedInput
+  availability?: Prisma.AvailabilityUncheckedUpdateManyWithoutUserNestedInput
 }
 
 
@@ -438,11 +519,13 @@ export type UserUncheckedUpdateWithoutAvailabilityInput = {
 export type UserCountOutputType = {
   eventTypes: number
   availability: number
+  dateOverrides: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   eventTypes?: boolean | UserCountOutputTypeCountEventTypesArgs
   availability?: boolean | UserCountOutputTypeCountAvailabilityArgs
+  dateOverrides?: boolean | UserCountOutputTypeCountDateOverridesArgs
 }
 
 /**
@@ -469,6 +552,13 @@ export type UserCountOutputTypeCountAvailabilityArgs<ExtArgs extends runtime.Typ
   where?: Prisma.AvailabilityWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountDateOverridesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DateOverrideWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -477,6 +567,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   timezone?: boolean
   eventTypes?: boolean | Prisma.User$eventTypesArgs<ExtArgs>
   availability?: boolean | Prisma.User$availabilityArgs<ExtArgs>
+  dateOverrides?: boolean | Prisma.User$dateOverridesArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -505,6 +596,7 @@ export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = run
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   eventTypes?: boolean | Prisma.User$eventTypesArgs<ExtArgs>
   availability?: boolean | Prisma.User$availabilityArgs<ExtArgs>
+  dateOverrides?: boolean | Prisma.User$dateOverridesArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -515,6 +607,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   objects: {
     eventTypes: Prisma.$EventTypePayload<ExtArgs>[]
     availability: Prisma.$AvailabilityPayload<ExtArgs>[]
+    dateOverrides: Prisma.$DateOverridePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -917,6 +1010,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   readonly [Symbol.toStringTag]: "PrismaPromise"
   eventTypes<T extends Prisma.User$eventTypesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$eventTypesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EventTypePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   availability<T extends Prisma.User$availabilityArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$availabilityArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AvailabilityPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  dateOverrides<T extends Prisma.User$dateOverridesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$dateOverridesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DateOverridePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1388,6 +1482,30 @@ export type User$availabilityArgs<ExtArgs extends runtime.Types.Extensions.Inter
   take?: number
   skip?: number
   distinct?: Prisma.AvailabilityScalarFieldEnum | Prisma.AvailabilityScalarFieldEnum[]
+}
+
+/**
+ * User.dateOverrides
+ */
+export type User$dateOverridesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DateOverride
+   */
+  select?: Prisma.DateOverrideSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the DateOverride
+   */
+  omit?: Prisma.DateOverrideOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DateOverrideInclude<ExtArgs> | null
+  where?: Prisma.DateOverrideWhereInput
+  orderBy?: Prisma.DateOverrideOrderByWithRelationInput | Prisma.DateOverrideOrderByWithRelationInput[]
+  cursor?: Prisma.DateOverrideWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.DateOverrideScalarFieldEnum | Prisma.DateOverrideScalarFieldEnum[]
 }
 
 /**

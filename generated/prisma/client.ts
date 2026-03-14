@@ -61,3 +61,8 @@ export type Availability = Prisma.AvailabilityModel
  * 
  */
 export type Booking = Prisma.BookingModel
+/**
+ * Model DateOverride
+ * 
+ */
+export type DateOverride = Prisma.DateOverrideModel

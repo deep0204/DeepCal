@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { Availability, AvailabilitySchedule, DateOverride, DAYS_OF_WEEK, TIMEZONES } from '@/lib/types'
+import { useState, useEffect } from 'react'
+import { Availability, AvailabilitySchedule, DAYS_OF_WEEK, TIMEZONES } from '@/lib/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
@@ -9,8 +9,23 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Plus, Trash2, Calendar } from 'lucide-react'
 import { Input } from '@/components/ui/input'
-import { updateAvailabilityAction } from '@/lib/actions'
+import { 
+  updateAvailabilityAction, 
+  updateTimezoneAction, 
+  addDateOverrideAction, 
+  deleteDateOverrideAction 
+} from '@/lib/actions'
 import { toast } from "sonner"
+import { useRouter } from 'next/navigation'
+
+// Updated interface to match our Prisma Schema
+interface DateOverride {
+  id: string
+  date: Date | string
+  startTime: string | null
+  endTime: string | null
+  isUnavailable: boolean
+}
 
 interface AvailabilitySettingsProps {
   availability: Availability | null
@@ -38,9 +53,11 @@ const TIME_OPTIONS = Array.from({ length: 48 }, (_, i) => {
 })
 
 export function AvailabilitySettings({ availability, schedules, dateOverrides }: AvailabilitySettingsProps) {
+  const router = useRouter()
   const [saving, setSaving] = useState(false)
   const [timezone, setTimezone] = useState(availability?.timezone || 'Asia/Kolkata')
 
+  // Weekly Schedule State
   const initializeSchedules = (): ScheduleState[] => {
     return DAYS_OF_WEEK.map((_, index) => {
       const existingSchedule = schedules.find((s) => s.day_of_week === index)
@@ -52,19 +69,32 @@ export function AvailabilitySettings({ availability, schedules, dateOverrides }:
       }
     })
   }
-
   const [scheduleState, setScheduleState] = useState<ScheduleState[]>(initializeSchedules)
+
+  // Date Override State
   const [overrides, setOverrides] = useState<DateOverride[]>(dateOverrides)
   const [newOverrideDate, setNewOverrideDate] = useState('')
+  const [overrideStart, setOverrideStart] = useState('09:00')
+  const [overrideEnd, setOverrideEnd] = useState('17:00')
+  const [isUnavailable, setIsUnavailable] = useState(false)
 
+  // --- HANDLERS ---
+
+  const handleTimezoneChange = async (newTz: string) => {
+    setTimezone(newTz)
+    const result = await updateTimezoneAction(newTz)
+    if (result.success) toast.success("Timezone updated!")
+    else toast.error("Failed to update timezone")
+  }
+  useEffect(() => {
+    setOverrides(dateOverrides)
+  }, [dateOverrides])
   const updateSchedule = (dayIndex: number, updates: Partial<ScheduleState>) => {
     setScheduleState((prev) => prev.map((s) => (s.day === dayIndex ? { ...s, ...updates } : s)))
   }
 
-  const handleSave = async () => {
+  const handleSaveWeekly = async () => {
     setSaving(true)
-    
-    // Format our local state to match what the Server Action expects
     const formattedData = scheduleState.map(s => ({
       dayOfWeek: s.day,
       startTime: s.start,
@@ -74,38 +104,55 @@ export function AvailabilitySettings({ availability, schedules, dateOverrides }:
 
     const result = await updateAvailabilityAction(formattedData)
 
-    if (result.error) {
-      alert(`Error: ${result.error}`)
-    } else {
-      toast.success("Availability Settings Saved Successfully!")
-    }
+    if (result.error) toast.error(`Error: ${result.error}`)
+    else toast.success("Weekly Hours Saved Successfully!")
     
     setSaving(false)
   }
 
-  const addDateOverride = () => {
-    if (!newOverrideDate) return
-    const newOverride = {
-      id: Math.random().toString(),
+  const handleAddOverride = async () => {
+    if (!newOverrideDate) return toast.error("Please select a date")
+
+    const result = await addDateOverrideAction({
       date: newOverrideDate,
-      is_available: false,
+      startTime: overrideStart,
+      endTime: overrideEnd,
+      isUnavailable
+    })
+
+    if (result.success) {
+      toast.success("Date override added!")
+      setNewOverrideDate('')
+      setIsUnavailable(false)
+      router.refresh() // Pull the fresh list from the server
+    } else {
+      toast.error(result.error || "Failed to add override")
     }
-    setOverrides((prev) => [...prev, newOverride])
-    setNewOverrideDate('')
   }
 
-  const removeOverride = (id: string) => {
+  const handleRemoveOverride = async (id: string) => {
+    // Optimistic UI Removal
     setOverrides((prev) => prev.filter((o) => o.id !== id))
+    
+    const result = await deleteDateOverrideAction(id)
+    if (result.error) {
+      toast.error("Failed to delete override")
+      router.refresh() // Revert UI if it failed
+    } else {
+      toast.success("Override removed")
+    }
   }
 
   return (
     <div className="space-y-6">
+      
+      {/* TIMEZONE CARD */}
       <Card className="bg-card">
         <CardHeader>
           <CardTitle>Timezone</CardTitle>
         </CardHeader>
         <CardContent>
-          <Select value={timezone} onValueChange={setTimezone}>
+          <Select value={timezone} onValueChange={handleTimezoneChange}>
             <SelectTrigger className="w-full max-w-xs bg-background">
               <SelectValue />
             </SelectTrigger>
@@ -120,6 +167,7 @@ export function AvailabilitySettings({ availability, schedules, dateOverrides }:
         </CardContent>
       </Card>
 
+      {/* WEEKLY HOURS CARD */}
       <Card className="bg-card">
         <CardHeader>
           <CardTitle>Working hours</CardTitle>
@@ -154,12 +202,13 @@ export function AvailabilitySettings({ availability, schedules, dateOverrides }:
             </div>
           ))}
 
-          <Button onClick={handleSave} disabled={saving} className="mt-6 w-full sm:w-auto">
-            {saving ? 'Saving...' : 'Save Changes'}
+          <Button onClick={handleSaveWeekly} disabled={saving} className="mt-6 w-full sm:w-auto">
+            {saving ? 'Saving...' : 'Save Weekly Hours'}
           </Button>
         </CardContent>
       </Card>
 
+      {/* DATE OVERRIDES CARD */}
       <Card className="bg-card">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -168,35 +217,75 @@ export function AvailabilitySettings({ availability, schedules, dateOverrides }:
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <p className="text-sm text-muted-foreground">Add dates when your availability changes from your daily hours.</p>
+          <p className="text-sm text-muted-foreground">Add specific dates when your availability changes from your weekly hours.</p>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 bg-muted/30 p-4 rounded-lg border border-border">
             <Input 
               type="date" 
               value={newOverrideDate} 
               onChange={(e) => setNewOverrideDate(e.target.value)} 
-              className="w-48 bg-background" 
+              className="w-full sm:w-48 bg-background" 
             />
-            <Button onClick={addDateOverride} size="sm" variant="outline" className="bg-background">
-              <Plus className="h-4 w-4 mr-1" /> Add an override
+            
+            <div className="flex items-center gap-2">
+              <Switch checked={isUnavailable} onCheckedChange={setIsUnavailable} />
+              <Label className="text-sm whitespace-nowrap">Unavailable all day</Label>
+            </div>
+
+            {!isUnavailable && (
+              <div className="flex items-center gap-2">
+                <Select value={overrideStart} onValueChange={setOverrideStart}>
+                  <SelectTrigger className="w-24 bg-background"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {TIME_OPTIONS.map((t) => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+                <span className="text-muted-foreground">-</span>
+                <Select value={overrideEnd} onValueChange={setOverrideEnd}>
+                  <SelectTrigger className="w-24 bg-background"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {TIME_OPTIONS.map((t) => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            <Button onClick={handleAddOverride} size="sm" variant="default" className="w-full sm:w-auto mt-2 sm:mt-0">
+              <Plus className="h-4 w-4 mr-1" /> Add
             </Button>
           </div>
 
           {overrides.length > 0 && (
-            <div className="space-y-2 mt-4">
-              {overrides.map((override) => (
-                <div key={override.id} className="flex items-center justify-between py-2 px-3 bg-muted/50 rounded-md border border-border">
-                  <span className="text-sm">
-                    {new Date(override.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
-                  </span>
-                  <div className="flex items-center gap-4">
-                    <span className="text-sm text-muted-foreground">{override.is_available ? 'Custom hours' : 'Blocked'}</span>
-                    <Button size="icon" variant="ghost" onClick={() => removeOverride(override.id)} className="h-8 w-8 text-muted-foreground hover:text-destructive">
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+            <div className="space-y-2 mt-6">
+              {overrides.map((override) => {
+                // Formatting the date correctly
+                const dateObj = new Date(override.date);
+                const displayDate = isNaN(dateObj.getTime()) 
+                  ? String(override.date) 
+                  : dateObj.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+
+                return (
+                  <div key={override.id} className="flex flex-col sm:flex-row sm:items-center justify-between py-3 px-4 bg-background rounded-md border border-border shadow-sm">
+                    <span className="text-sm font-medium mb-2 sm:mb-0">
+                      {displayDate}
+                    </span>
+                    <div className="flex items-center gap-4 justify-between sm:justify-end w-full sm:w-auto">
+                      {override.isUnavailable ? (
+                        <span className="text-sm font-medium text-destructive bg-destructive/10 px-2 py-1 rounded">
+                          Unavailable
+                        </span>
+                      ) : (
+                        <span className="text-sm text-muted-foreground font-medium bg-muted px-2 py-1 rounded">
+                          {override.startTime} - {override.endTime}
+                        </span>
+                      )}
+                      <Button size="icon" variant="ghost" onClick={() => handleRemoveOverride(override.id)} className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10">
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           )}
         </CardContent>

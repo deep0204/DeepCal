@@ -54,7 +54,8 @@ export const ModelName = {
   User: 'User',
   EventType: 'EventType',
   Availability: 'Availability',
-  Booking: 'Booking'
+  Booking: 'Booking',
+  DateOverride: 'DateOverride'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -126,6 +127,18 @@ export const BookingScalarFieldEnum = {
 } as const
 
 export type BookingScalarFieldEnum = (typeof BookingScalarFieldEnum)[keyof typeof BookingScalarFieldEnum]
+
+
+export const DateOverrideScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  date: 'date',
+  startTime: 'startTime',
+  endTime: 'endTime',
+  isUnavailable: 'isUnavailable'
+} as const
+
+export type DateOverrideScalarFieldEnum = (typeof DateOverrideScalarFieldEnum)[keyof typeof DateOverrideScalarFieldEnum]
 
 
 export const SortOrder = {

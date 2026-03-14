@@ -14,6 +14,7 @@ model User {
   timezone     String         @default("Asia/Kolkata")
   eventTypes   EventType[]
   availability Availability[]
+  dateOverrides DateOverride[]
 }
 
 // The different meeting types (e.g., 15 Min Chat)
@@ -61,4 +62,15 @@ model Booking {
   status              String    @default("upcoming") // upcoming, past, cancelled
   cancellationReason  String?
   createdAt           DateTime  @default(now())
+}
+model DateOverride {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date          DateTime 
+  startTime     String?  // e.g., "10:00"
+  endTime       String?  // e.g., "14:00"
+  isUnavailable Boolean  @default(false) // True if they are taking the whole day off
+
+  @@unique([userId, date]) // Ensures only one override per specific date
 }
